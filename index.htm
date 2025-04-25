@@ -2,136 +2,148 @@
 <html>
 <head>
     <title>webGerber</title>
-    <script src=jquery-1.8.2.min.js></script>
-    <script src=jquery.mousewheel.js></script>
-    <script src=three.min.js></script>
-    <script src=Stats.js></script>
-    <!-- git versions
-    <script src=https://raw.github.com/mrdoob/three.js/master/build/three.min.js></script>
-    <script src=http://mrdoob.github.com/three.js/examples/js/Stats.js></script>
-    -->
-    <script src=ObjectControls.js></script>
-    <script src=webGerber.js></script>
-        <style>
+    <script src="jquery-1.8.2.min.js"></script>
+    <script src="jquery.mousewheel.js"></script>
+    <script src="three.min.js"></script>
+    <script src="Stats.js"></script>
+    <script src="ObjectControls.js"></script>
+    <script src="webGerber.js"></script>
+    <style>
         body {
             margin: 0;
-            /*background: #57e;*/
-            /*background: black;
-            color: white;*/
+            background: #f0f0f0;
+            font-family: Arial, sans-serif;
         }
-        canvas:not(.layer) {
+
+        .upload-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .upload-btn:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .upload-btn:active {
+            transform: scale(0.95);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .instructions {
+            color: #666;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .overlay {
+            display: none; /* Hide original drag/drop overlay */
+        }
+
+        .controls {
+            /* Existing control styles */
+            position: absolute;
+            right: 0;
+            top: 0;
+            padding: 10px;
+            z-index: 2000;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+        }
+
+        canvas {
             position: absolute;
             left: 0;
             top: 0;
         }
-        html, body, canvas:not(.layer), .main, .overlay, .overlay>div {
-            width: 100%;
-            height: 100%;
-        }
-        canvas.layer {
-            display: none;
-        }
-        .main {
-            display: -webkit-box;
-            -webkit-box-orient: horizontal;
-            -webkit-box-pack: center;
-            -webkit-box-align: center;
-            
-            display: -moz-box;
-            -moz-box-orient: horizontal;
-            -moz-box-pack: center;
-            -moz-box-align: center;
-            
-            display: box;
-            box-orient: horizontal;
-            box-pack: center;
-            box-align: center;
-            
-            color: #aaa;
-        }
-        .main>* {
-            border-radius: 10px;
-            padding: 10px;
-            border: 3px dotted #aaa;
-        }
-        .main h1 {
-            margin: 0;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            user-select: none;
-            font-weight: normal;
-        }
-        .overlay {
-            position: absolute;
-            right: 0;
-            top: 0;
-            z-index: 3000;
-            background: rgba(0, 0, 0, .5);
-            color: white;
-            font-size: 1.7em;
-            font-family: sans-serif;
-        }
-        .overlay>div {
-            display: -webkit-box;
-            -webkit-box-orient: horizontal;
-            -webkit-box-pack: center;
-            -webkit-box-align: center;
-            
-            display: -moz-box;
-            -moz-box-orient: horizontal;
-            -moz-box-pack: center;
-            -moz-box-align: center;
-            
-            display: box;
-            box-orient: horizontal;
-            box-pack: center;
-            box-align: center;
-        }
-        .controls {
-            position: absolute;
-            right: 0;
-            top: 0;
-            padding-left: 10px;
-            padding-right: 10px;
-            z-index: 2000;
-            background: rgba(0, 0, 0, .5);
-            box-shadow: 0 0 .5em rgba(0, 0, 0, .9);
-            -webkit-transition: all 0.4s;
-            -moz-transition: all 0.4s;
-            transition: all 0.4s;
-            color: white;
-            font-size: 1.04em;
-            font-family: sans-serif;
-        }
-        .controls>span {
-            display: block;
-            font-weight: bold;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            user-select: none;
-            cursor: pointer;
-            padding-top: 5px;
-            padding-bottom: 5px;
-            text-align: center;
-        }
-        .controls>div {
-            overflow: hidden;
-            -webkit-transition: all 0.4s;
-            -moz-transition: all 0.4s;
-            transition: all 0.4s;
-        }
-        .controls:not(.open) {
-            border-bottom-left-radius: 5px;
-        }
-        .controls:not(.open)>div {
-            height: 0;
-        }
-        .controls.open {
-            height: 100%;
-        }
-        
     </style>
 </head>
 <body>
+    <div class="upload-container">
+        <h1>WebGerber Viewer</h1>
+        <label for="file-input" class="upload-btn">
+            Upload Gerber Files
+        </label>
+        <input type="file" id="file-input" multiple accept=".gbr,.ger">
+        <p class="instructions">Select PCB design files in Gerber format (.gbr, .ger)</p>
+    </div>
+
+    <div class="controls">
+        <!-- Controls content here -->
+    </div>
+
+    <script>
+        // File upload handling
+        $(document).ready(function() {
+            $('#file-input').on('change', function(e) {
+                const files = e.target.files;
+                if (files.length > 0) {
+                    // Hide upload interface
+                    $('.upload-container').hide();
+                    
+                    // Initialize viewer and handle files
+                    if (typeof initViewer === 'function') {
+                        initViewer(files);
+                    } else {
+                        console.error('Viewer initialization function not found');
+                    }
+                }
+            });
+
+            // Optional: Keep this if you want to maintain drag/drop functionality
+            document.body.addEventListener('dragover', function(e) {
+                e.preventDefault();
+            });
+
+            document.body.addEventListener('drop', function(e) {
+                e.preventDefault();
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    $('.upload-container').hide();
+                    if (typeof initViewer === 'function') {
+                        initViewer(files);
+                    }
+                }
+            });
+        });
+
+        // Example viewer initialization (should match your webGerber.js implementation)
+        function initViewer(files) {
+            // Your existing viewer initialization code here
+            console.log('Files loaded:', files);
+            
+            // Example Three.js setup
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+            
+            // Add your Gerber rendering logic here
+        }
+    </script>
 </body>
 </html>
